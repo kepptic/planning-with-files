@@ -1,18 +1,30 @@
 # Planning with Files
 
-> **Work like Manus** — the AI agent company Meta just acquired for **$2 billion**.
+> **Work like Manus** — the AI agent company Meta acquired for **$2 billion**.
+
+## Thank You
+
+To everyone who starred, forked, and shared this skill — thank you. This project blew up in less than 24 hours, and the support from the community has been incredible.
+
+If this skill helps you work smarter, that's all I wanted.
+
+---
 
 A Claude Code plugin containing an [Agent Skill](https://code.claude.com/docs/en/skills) that transforms your workflow to use persistent markdown files for planning, progress tracking, and knowledge storage — the exact pattern that made Manus worth billions.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-blue)](https://code.claude.com/docs/en/plugins)
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-green)](https://code.claude.com/docs/en/skills)
+[![Version](https://img.shields.io/badge/version-2.0.0-brightgreen)](https://github.com/OthmanAdi/planning-with-files/releases)
 
-## Star History
+## What's New in v2.0.0
 
-[![Star History Chart](https://api.star-history.com/svg?repos=OthmanAdi/planning-with-files&type=Date)](https://star-history.com/#OthmanAdi/planning-with-files&Date)
+- **Hooks Integration** — Automatic plan re-reading and completion verification
+- **Templates** — Structured templates for task_plan.md, findings.md, progress.md
+- **Scripts** — Helper scripts for initialization and completion checks
+- **Enhanced Documentation** — 2-Action Rule, 3-Strike Protocol, 5-Question Reboot Test
 
----
+See [CHANGELOG.md](CHANGELOG.md) for details. Upgrading from v1.x? See [MIGRATION.md](MIGRATION.md).
 
 ## Why This Skill?
 
@@ -38,20 +50,18 @@ For every complex task, create THREE files:
 
 ```
 task_plan.md      → Track phases and progress
-notes.md          → Store research and findings
-[deliverable].md  → Final output
+findings.md       → Store research and findings
+progress.md       → Session log and test results
 ```
 
-### The Loop
+### The Core Principle
 
 ```
-1. Create task_plan.md with goal and phases
-2. Research → save to notes.md → update task_plan.md
-3. Read notes.md → create deliverable → update task_plan.md
-4. Deliver final output
-```
+Context Window = RAM (volatile, limited)
+Filesystem = Disk (persistent, unlimited)
 
-**Key insight:** By reading `task_plan.md` before each decision, goals stay in the attention window. This is how Manus handles ~50 tool calls without losing track.
+→ Anything important gets written to disk.
+```
 
 ## Installation
 
@@ -90,46 +100,48 @@ git clone https://github.com/OthmanAdi/planning-with-files.git
 cp -r planning-with-files/skills/* ~/.claude/skills/
 ```
 
-### Verify Installation
-
-Once installed, the skill will automatically activate when you:
-- Start complex tasks
-- Mention "planning", "organize", or "track progress"
-- Ask for structured work
-
 ## Usage
 
 Once installed, Claude will automatically:
 
 1. **Create `task_plan.md`** before starting complex tasks
-2. **Update progress** with checkboxes after each phase
-3. **Store findings** in `notes.md` instead of stuffing context
-4. **Log errors** for future reference
-5. **Re-read plan** before major decisions
+2. **Re-read plan** before major decisions (via hooks)
+3. **Update progress** with checkboxes after each phase
+4. **Store findings** in `findings.md` instead of stuffing context
+5. **Log errors** for future reference
+6. **Verify completion** before stopping (via hooks)
 
-### Example
+### Key Rules
 
-**You:** "Research the benefits of TypeScript and write a summary"
+1. **Create Plan First** — Never start without `task_plan.md`
+2. **The 2-Action Rule** — Save findings after every 2 view/browser operations
+3. **Log ALL Errors** — They help avoid repetition
+4. **Never Repeat Failures** — Track attempts, mutate approach
 
-**Claude creates:**
+## File Structure
 
-```markdown
-# Task Plan: TypeScript Benefits Research
-
-## Goal
-Create a research summary on TypeScript benefits.
-
-## Phases
-- [x] Phase 1: Create plan ✓
-- [ ] Phase 2: Research and gather sources (CURRENT)
-- [ ] Phase 3: Synthesize findings
-- [ ] Phase 4: Deliver summary
-
-## Status
-**Currently in Phase 2** - Searching for sources
 ```
-
-Then continues through each phase, updating the file as it goes.
+planning-with-files/
+├── .claude-plugin/
+│   ├── plugin.json          # Plugin manifest
+│   └── marketplace.json     # Marketplace listing
+├── skills/
+│   └── planning-with-files/
+│       ├── SKILL.md         # Main skill definition
+│       ├── reference.md     # Manus principles
+│       ├── examples.md      # Usage examples
+│       ├── templates/       # File templates
+│       │   ├── task_plan.md
+│       │   ├── findings.md
+│       │   └── progress.md
+│       └── scripts/         # Helper scripts
+│           ├── init-session.sh
+│           └── check-complete.sh
+├── CHANGELOG.md             # Version history
+├── MIGRATION.md             # Upgrade guide
+├── LICENSE
+└── README.md
+```
 
 ## The Manus Principles
 
@@ -138,27 +150,10 @@ This skill implements these key context engineering principles:
 | Principle | Implementation |
 |-----------|----------------|
 | Filesystem as memory | Store in files, not context |
-| Attention manipulation | Re-read plan before decisions |
+| Attention manipulation | Re-read plan before decisions (hooks) |
 | Error persistence | Log failures in plan file |
 | Goal tracking | Checkboxes show progress |
-| Append-only context | Never modify history |
-
-## File Structure
-
-```
-planning-with-files/
-├── .claude-plugin/
-│   └── plugin.json         # Plugin manifest (required for plugin distribution)
-├── skills/
-│   └── planning-with-files/
-│       ├── SKILL.md        # Agent Skill definition (what Claude reads)
-│       ├── reference.md    # Manus principles deep dive
-│       └── examples.md     # Real usage examples
-├── LICENSE
-└── README.md               # This file
-```
-
-> **Note:** This repository is a **Plugin** that contains an **Agent Skill**. The plugin format (`.claude-plugin/`) enables easy distribution and installation, while the skill (`skills/planning-with-files/SKILL.md`) defines the actual behavior that Claude uses.
+| Completion verification | Stop hook checks all phases |
 
 ## When to Use
 
@@ -176,9 +171,10 @@ planning-with-files/
 
 ## Acknowledgments
 
-- **Manus AI** — For pioneering context engineering patterns that made this possible
-- **Anthropic** — For Claude Code, the [Agent Skills](https://code.claude.com/docs/en/skills) framework and the [Plugin system](https://code.claude.com/docs/en/plugins)
-- Based on [Context Engineering for AI Agents](https://manus.im/de/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus)
+- **Manus AI** — For pioneering context engineering patterns
+- **Anthropic** — For Claude Code, Agent Skills, and the Plugin system
+- **Lance Martin** — For the detailed Manus architecture analysis
+- Based on [Context Engineering for AI Agents](https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus)
 
 ## Contributing
 
@@ -191,12 +187,10 @@ Contributions welcome! Please:
 
 MIT License — feel free to use, modify, and distribute.
 
-## Thank You
-
-To everyone who starred, forked, and shared this skill — thank you. This project blew up in less than 24 hours, and the support from the community has been incredible.
-
-If this skill helps you work smarter, that's all I wanted.
-
 ---
 
 **Author:** [Ahmad Othman Ammar Adi](https://github.com/OthmanAdi)
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=OthmanAdi/planning-with-files&type=Date)](https://star-history.com/#OthmanAdi/planning-with-files&Date)
